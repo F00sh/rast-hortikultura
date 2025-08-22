@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+:root {
+  --brand: #2f7d4d;
+  --brand-dark: #1e5a37;
+  --accent: #f08a24;
+
+}
+
+
+
+
+@layer base {
+  body {
+    @apply bg-white text-neutral-800;
+  }
+
+  .dark body {
+    @apply bg-neutral-900 text-neutral-100;
+  }
+}

@@ -1,4 +1,4 @@
-import { c as defineEventHandler, r as readFormData, e as createError, u as useRuntimeConfig } from '../../_/nitro.mjs';
+import { c as defineEventHandler, r as readMultipartFormData, e as createError, u as useRuntimeConfig } from '../../_/nitro.mjs';
 import nodemailer from 'nodemailer';
 import 'node:http';
 import 'node:https';
@@ -9,55 +9,72 @@ import 'node:path';
 import 'node:crypto';
 import 'node:url';
 
-const CONTACT_TO = "upiti@rast-hortikultura.hr";
 const contact_post = defineEventHandler(async (event) => {
-  var _a, _b, _c, _d;
-  try {
-    const form = await readFormData(event);
-    const name = String((_a = form.get("name")) != null ? _a : "").trim();
-    const email = String((_b = form.get("email")) != null ? _b : "").trim();
-    const message = String((_c = form.get("message")) != null ? _c : "").trim();
-    const files = Array.from((_d = form.getAll("files")) != null ? _d : []);
-    if (!name || !email || !message) {
-      throw createError({ statusCode: 400, statusMessage: "Nedostaju obavezna polja." });
-    }
-    const attachments = await Promise.all(
-      files.map(async (f, i) => ({
-        filename: f.name || `prilog-${i + 1}`,
-        content: Buffer.from(await f.arrayBuffer()),
-        contentType: f.type || "application/octet-stream"
-      }))
-    );
-    const config = useRuntimeConfig();
-    const port = Number(config.smtpPort || 587);
-    const transporter = nodemailer.createTransport({
-      host: config.smtpHost,
-      port,
-      secure: port === 465,
-      auth: config.smtpUser && config.smtpPass ? { user: config.smtpUser, pass: config.smtpPass } : void 0
-    });
-    await transporter.sendMail({
-      from: `"RAST Web" <${config.smtpUser || "no-reply@rast-hortikultura.hr"}>`,
-      to: CONTACT_TO,
-      // ⇦ šalje se na upiti@rast-hortikultura.hr
-      replyTo: email,
-      // odgovor ide korisniku
-      subject: `Kontakt forma \u2013 ${name}`,
-      text: `Ime: ${name}
+  const form = await readMultipartFormData(event);
+  if (!form) throw createError({ statusCode: 400, statusMessage: "Bad Request" });
+  const getText = (key) => {
+    var _a;
+    return (_a = form.find((f) => f.name === key && typeof f.data === "string")) == null ? void 0 : _a.data;
+  };
+  const name = (getText("name") || "").trim();
+  const email = (getText("email") || "").trim();
+  const message = (getText("message") || "").trim();
+  const files = form.filter(
+    (f) => f.name === "files" && f.filename && f.type && Buffer.isBuffer(f.data)
+  );
+  if (!name || !email || !message) {
+    throw createError({ statusCode: 400, statusMessage: "Nedostaju polja." });
+  }
+  const cfg = useRuntimeConfig();
+  const host = cfg.smtpHost || process.env.NUXT_SMTP_HOST;
+  const port = Number(cfg.smtpPort || process.env.NUXT_SMTP_PORT || 465);
+  const user = cfg.smtpUser || process.env.NUXT_SMTP_USER;
+  const pass = cfg.smtpPass || process.env.NUXT_SMTP_PASS;
+  const to = cfg.contactTo || process.env.NUXT_CONTACT_TO;
+  if (!host || !port || !user || !pass || !to) {
+    throw createError({ statusCode: 500, statusMessage: "SMTP nije konfiguriran." });
+  }
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    // 465 -> SSL/TLS
+    secure: true,
+    // OBAVEZNO za 465
+    auth: { user, pass }
+    // Ako bi provider imao čudan cert, kao krajnju mjeru:
+    // tls: { rejectUnauthorized: false }
+  });
+  await transporter.verify();
+  const attachments = files.map((f) => ({
+    filename: f.filename,
+    content: f.data,
+    contentType: f.type
+  }));
+  const subject = `Novi upit s weba \u2013 ${name}`;
+  const html = `
+    <p><strong>Ime:</strong> ${escapeHtml(name)}</p>
+    <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+    <p><strong>Poruka:</strong><br/>${escapeHtml(message).replace(/\n/g, "<br/>")}</p>
+  `;
+  const text = `Ime: ${name}
 Email: ${email}
 
 Poruka:
-${message}`,
-      attachments
-    });
-    return { ok: true };
-  } catch (err) {
-    throw createError({
-      statusCode: (err == null ? void 0 : err.statusCode) || 500,
-      statusMessage: (err == null ? void 0 : err.statusMessage) || "Gre\u0161ka pri slanju poruke."
-    });
-  }
+${message}`;
+  const info = await transporter.sendMail({
+    from: `"RAST web upit" <${user}>`,
+    to,
+    replyTo: email,
+    subject,
+    html,
+    text,
+    attachments
+  });
+  return { ok: true, messageId: info.messageId };
 });
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+}
 
 export { contact_post as default };
 //# sourceMappingURL=contact.post.mjs.map

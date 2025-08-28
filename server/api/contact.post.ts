@@ -40,7 +40,10 @@ export default defineEventHandler(async (event: H3Event) => {
     auth: { user, pass }
     // Ako bi provider imao čudan cert, kao krajnju mjeru:
     // tls: { rejectUnauthorized: false }
+
   })
+
+  await transporter.verify()
 
   const attachments = files.map(f => ({
     filename: f.filename!,

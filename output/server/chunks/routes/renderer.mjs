@@ -71,7 +71,7 @@ function createHead(options = {}) {
   return head;
 }
 
-const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[]};
+const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"name":"theme-color","content":"#065f46"}],"link":[],"style":[],"script":[],"noscript":[],"htmlAttrs":{"lang":"hr","class":""},"title":"RAST – Uređenje vrtova i zelenih površina"};
 
 const appRootTag = "div";
 

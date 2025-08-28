@@ -2,6 +2,7 @@ import { defineComponent, mergeProps, withCtx, createTextVNode, computed, ref, u
 import { ssrRenderAttrs, ssrRenderComponent, ssrRenderStyle, ssrRenderList, ssrRenderAttr, ssrRenderClass, ssrInterpolate, ssrIncludeBooleanAttr } from 'vue/server-renderer';
 import { _ as __nuxt_component_0$1 } from './nuxt-link-B81-QzfC.mjs';
 import { _ as _export_sfc } from './server.mjs';
+import { onBeforeRouteLeave } from 'vue-router';
 import '../_/nitro.mjs';
 import 'node:http';
 import 'node:https';
@@ -16,7 +17,6 @@ import 'vue-bundle-renderer/runtime';
 import 'unhead/server';
 import 'devalue';
 import 'unhead/utils';
-import 'vue-router';
 
 const heroSrc = "https://raw.githubusercontent.com/F00sh/rast-assets/refs/heads/main/header%20background.png";
 const _sfc_main$6 = /* @__PURE__ */ defineComponent({
@@ -241,11 +241,19 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
       const mb = bytes / (1024 * 1024);
       return mb >= 1 ? `${mb.toFixed(1)} MB` : `${(bytes / 1024).toFixed(0)} KB`;
     }
+    onBeforeRouteLeave((to, from, next) => {
+      if (!loading.value) return next();
+      const ok = confirm("Poruka se još šalje. Želite li napustiti stranicu?");
+      if (ok) {
+        return next();
+      }
+      next(false);
+    });
     return (_ctx, _push, _parent, _attrs) => {
       _push(`<section${ssrRenderAttrs(mergeProps({
         id: "kontakt",
         class: "py-16 sm:py-20 bg-neutral-100 dark:bg-neutral-950"
-      }, _attrs))}><div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"><div class="grid gap-8 md:grid-cols-2 items-start"><div class="reveal"><p class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium tracking-wide text-emerald-700 border-emerald-200 bg-emerald-50 dark:text-emerald-300 dark:border-emerald-800/60 dark:bg-emerald-900/30"> Kontakt </p><h2 class="mt-4 text-3xl md:text-4xl font-bold tracking-tight"> Javite nam se – tu smo za vaš projekt </h2><p class="mt-4 text-neutral-700 dark:text-neutral-300"> Slobodno nas kontaktirajte mailom na <a class="text-emerald-700 dark:text-emerald-400 underline underline-offset-4" href="mailto:upiti@rast-hortikultura.hr">upiti@rast-hortikultura.hr</a> ili telefonom na <a class="text-emerald-700 dark:text-emerald-400 underline underline-offset-4" href="tel:+385959988777">+385 95 998 8777</a>. </p><ul class="mt-6 space-y-2 text-neutral-700 dark:text-neutral-300"><li class="flex items-center gap-3"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white text-[10px]">✓</span> Brz odgovor i jasni koraci izvedbe </li><li class="flex items-center gap-3"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white text-[10px]">✓</span> Mogućnost dogovora termina na terenu </li><li class="flex items-center gap-3"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white text-[10px]">✓</span> Priložite fotografije/video za precizniju ponudu </li></ul><div class="mt-6 rounded-xl border bg-white/70 dark:bg-neutral-900/60 dark:border-neutral-800 p-4"><p class="text-sm text-neutral-600 dark:text-neutral-300"> Radimo širom Hrvatske i susjednih zemalja. Javite nam osnovne informacije o projektu, lokaciju i okvirne rokove – predložit ćemo optimalno rješenje. </p></div></div><div class="reveal"><form class="rounded-2xl border bg-white/80 dark:bg-neutral-900/80 dark:border-neutral-800 p-5 md:p-6 shadow-subtle" novalidate><div class="grid gap-4"><div><label class="block text-sm mb-1 text-neutral-700 dark:text-neutral-300">Ime i prezime</label><input${ssrRenderAttr("value", name.value)} type="text" required autocomplete="name" class="w-full rounded-lg border bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 px-3 py-2 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"></div><div><label class="block text-sm mb-1 text-neutral-700 dark:text-neutral-300">Email</label><input${ssrRenderAttr("value", email.value)} type="email" required inputmode="email" autocomplete="email" class="w-full rounded-lg border bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 px-3 py-2 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"></div><div><label class="block text-sm mb-1 text-neutral-700 dark:text-neutral-300">Poruka</label><textarea rows="5" required class="w-full rounded-lg border bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 px-3 py-2 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40" placeholder="Npr. lokacija, površina, željene usluge, rokovi…">${ssrInterpolate(message.value)}</textarea></div><div><label class="block text-sm mb-2 text-neutral-700 dark:text-neutral-300">Privitci (slike ili video, do 25 MB po datoteci)</label><div class="${ssrRenderClass([dragOver.value ? "border-emerald-500/60 bg-emerald-50/30 dark:bg-emerald-900/10" : "", "rounded-xl border-2 border-dashed bg-neutral-50 dark:bg-neutral-900/60 border-neutral-300 dark:border-neutral-700 p-4 flex flex-col items-center justify-center text-center transition hover:border-emerald-500/60"])}"><svg class="h-8 w-8 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 15l4 4L17 7"></path></svg><p class="mt-2 text-sm text-neutral-600 dark:text-neutral-300"> Povuci i pusti datoteke ovdje ili <label for="fileInput" class="text-emerald-700 dark:text-emerald-400 underline underline-offset-4 cursor-pointer">odaberi s uređaja</label>. </p><input id="fileInput" type="file" class="sr-only" multiple accept="image/*,video/*"><p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400"> Maks. ${ssrInterpolate(MAX_FILES)} datoteka · ${ssrInterpolate(MAX_FILE_MB)} MB po datoteci </p></div>`);
+      }, _attrs))}><div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"><div class="grid gap-8 md:grid-cols-2 items-start"><div class="reveal"><p class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium tracking-wide text-emerald-700 border-emerald-200 bg-emerald-50 dark:text-emerald-300 dark:border-emerald-800/60 dark:bg-emerald-900/30"> Kontakt </p><h2 class="mt-4 text-3xl md:text-4xl font-bold tracking-tight"> Javite nam se – tu smo za vaš projekt </h2><p class="mt-4 text-neutral-700 dark:text-neutral-300"> Slobodno nas kontaktirajte mailom na <a class="text-emerald-700 dark:text-emerald-400 underline underline-offset-4" href="mailto:upiti@rast-hortikultura.hr">upiti@rast-hortikultura.hr</a> ili telefonom na <a class="text-emerald-700 dark:text-emerald-400 underline underline-offset-4" href="tel:+385959988777">+385 95 998 8777</a>. </p><ul class="mt-6 space-y-2 text-neutral-700 dark:text-neutral-300"><li class="flex items-center gap-3"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white text-[10px]">✓</span> Brz odgovor i jasni koraci izvedbe </li><li class="flex items-center gap-3"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white text-[10px]">✓</span> Mogućnost dogovora termina na terenu </li><li class="flex items-center gap-3"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white text-[10px]">✓</span> Priložite fotografije/video za precizniju ponudu </li></ul><div class="mt-6 rounded-xl border bg-white/70 dark:bg-neutral-900/60 dark:border-neutral-800 p-4"><p class="text-sm text-neutral-600 dark:text-neutral-300"> Radimo širom Hrvatske i susjednih zemalja. Javite nam osnovne informacije o projektu, lokaciju i okvirne rokove – predložit ćemo optimalno rješenje. </p></div></div><div class="reveal"><form class="rounded-2xl border bg-white/80 dark:bg-neutral-900/80 dark:border-neutral-800 p-5 md:p-6 shadow-subtle" novalidate><div class="grid gap-4"><div><label class="block text-sm mb-1 text-neutral-700 dark:text-neutral-300">Ime i prezime</label><input${ssrRenderAttr("value", name.value)} type="text" required autocomplete="name" class="w-full rounded-lg border bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 px-3 py-2 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"></div><div><label class="block text-sm mb-1 text-neutral-700 dark:text-neutral-300">Email</label><input${ssrRenderAttr("value", email.value)} type="email" required inputmode="email" autocomplete="email" class="w-full rounded-lg border bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 px-3 py-2 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"></div><div><label class="block text-sm mb-1 text-neutral-700 dark:text-neutral-300">Poruka</label><textarea rows="5" required class="w-full rounded-lg border bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 px-3 py-2 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40" placeholder="Npr. lokacija, površina, željene usluge, rokovi…">${ssrInterpolate(message.value)}</textarea></div><div><label class="block text-sm mb-2 text-neutral-700 dark:text-neutral-300">Privitci (slike ili video, do 25 MB po datoteci)</label><div class="${ssrRenderClass([dragOver.value ? "border-emerald-500/60 bg-emerald-50/30 dark:bg-emerald-900/10" : "", "rounded-xl border-2 border-dashed bg-neutral-50 dark:bg-neutral-900/60 border-neutral-300 dark:border-neutral-700 p-4 flex flex-col items-center justify-center text-center transition hover:border-emerald-500/60"])}"><svg class="h-8 w-8 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 15l4 4L17 7"></path></svg><p class="mt-2 text-sm text-neutral-600 dark:text-neutral-300"> Povuci i pusti datoteke ovdje ili <label for="fileInput" class="text-emerald-700 dark:text-emerald-400 underline underline-offset-4 cursor-pointer">odaberi s uređaja</label>. </p><input id="fileInput" type="file" class="sr-only" multiple accept="image/*,video/*"><p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400"> Maks. ${ssrInterpolate(MAX_FILES)} datoteka · ${ssrInterpolate(MAX_FILE_MB)} MB po datoteci </p></div>`);
       if (attachments.value.length) {
         _push(`<ul class="mt-3 space-y-2"><!--[-->`);
         ssrRenderList(attachments.value, (f, i) => {
@@ -260,18 +268,15 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
       } else {
         _push(`<!---->`);
       }
-      _push(`</div><input${ssrRenderAttr("value", hp.value)} type="text" autocomplete="off" class="hidden" tabindex="-1" aria-hidden="true">`);
+      _push(`</div><input${ssrRenderAttr("value", hp.value)} type="text" autocomplete="off" class="hidden" tabindex="-1" aria-hidden="true"><div aria-live="polite" class="min-h-[1.25rem]">`);
       if (success.value) {
         _push(`<p class="text-emerald-700 dark:text-emerald-400 text-sm">Hvala! Poruka je poslana.</p>`);
-      } else {
-        _push(`<!---->`);
-      }
-      if (errors.value.form) {
+      } else if (errors.value.form) {
         _push(`<p class="text-red-600 dark:text-red-400 text-sm">${ssrInterpolate(errors.value.form)}</p>`);
       } else {
         _push(`<!---->`);
       }
-      _push(`<div class="pt-2"><button${ssrIncludeBooleanAttr(loading.value) ? " disabled" : ""} class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 disabled:opacity-60">`);
+      _push(`</div><div class="pt-2"><button${ssrIncludeBooleanAttr(loading.value) ? " disabled" : ""} class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 disabled:opacity-60 disabled:cursor-not-allowed">`);
       if (loading.value) {
         _push(`<svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="4" class="opacity-25"></circle><path d="M4 12a8 8 0 018-8" stroke-width="4" class="opacity-75"></path></svg>`);
       } else {
@@ -312,4 +317,4 @@ _sfc_main.setup = (props, ctx) => {
 const index = /* @__PURE__ */ _export_sfc(_sfc_main, [["ssrRender", _sfc_ssrRender]]);
 
 export { index as default };
-//# sourceMappingURL=index-V6nQ_nrN.mjs.map
+//# sourceMappingURL=index-C6glaeeF.mjs.map

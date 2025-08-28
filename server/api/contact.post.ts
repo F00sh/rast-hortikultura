@@ -1,31 +1,75 @@
+// server/api/contact.post.ts
 import nodemailer from 'nodemailer'
+import type { H3Event } from 'h3'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event: H3Event) => {
   const form = await readMultipartFormData(event)
-  const name = form?.find(f => f.name === 'name')?.data?.toString('utf-8') || ''
-  const email = form?.find(f => f.name === 'email')?.data?.toString('utf-8') || ''
-  const message = form?.find(f => f.name === 'message')?.data?.toString('utf-8') || ''
+  if (!form) throw createError({ statusCode: 400, statusMessage: 'Bad Request' })
 
-  const files = (form || []).filter(f => f.name === 'files' && f.filename).map(f => ({
+  const getText = (key: string) =>
+    form.find(f => f.name === key && typeof f.data === 'string')?.data as string | undefined
+
+  const name = (getText('name') || '').trim()
+  const email = (getText('email') || '').trim()
+  const message = (getText('message') || '').trim()
+
+  const files = form.filter(
+    f => f.name === 'files' && f.filename && f.type && Buffer.isBuffer(f.data)
+  )
+
+  if (!name || !email || !message) {
+    throw createError({ statusCode: 400, statusMessage: 'Nedostaju polja.' })
+  }
+
+  // ENV / runtime
+  const cfg = useRuntimeConfig()
+  const host = cfg.smtpHost || process.env.NUXT_SMTP_HOST
+  const port = Number(cfg.smtpPort || process.env.NUXT_SMTP_PORT || 465)
+  const user = cfg.smtpUser || process.env.NUXT_SMTP_USER
+  const pass = cfg.smtpPass || process.env.NUXT_SMTP_PASS
+  const to = cfg.contactTo || process.env.NUXT_CONTACT_TO
+
+  if (!host || !port || !user || !pass || !to) {
+    throw createError({ statusCode: 500, statusMessage: 'SMTP nije konfiguriran.' })
+  }
+
+  const transporter = nodemailer.createTransport({
+    host,
+    port,                 // 465 -> SSL/TLS
+    secure: true,         // OBAVEZNO za 465
+    auth: { user, pass }
+    // Ako bi provider imao čudan cert, kao krajnju mjeru:
+    // tls: { rejectUnauthorized: false }
+  })
+
+  const attachments = files.map(f => ({
     filename: f.filename!,
-    content: f.data,
+    content: f.data as Buffer,
     contentType: f.type
   }))
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: false,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+  const subject = `Novi upit s weba – ${name}`
+  const html = `
+    <p><strong>Ime:</strong> ${escapeHtml(name)}</p>
+    <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+    <p><strong>Poruka:</strong><br/>${escapeHtml(message).replace(/\n/g, '<br/>')}</p>
+  `
+  const text = `Ime: ${name}\nEmail: ${email}\n\nPoruka:\n${message}`
+
+  // FROM = isti kao user (shared hosting zahtjev)
+  const info = await transporter.sendMail({
+    from: `"RAST web upit" <${user}>`,
+    to,
+    replyTo: email,
+    subject,
+    html,
+    text,
+    attachments
   })
 
-  await transporter.sendMail({
-    from: `RAST Web <${process.env.SMTP_USER}>`,
-    to: process.env.MAIL_TO || 'fooshmoola@gmail.com',
-    subject: `Kontakt poruka – ${name || 'Bez imena'}`,
-    text: `Ime: ${name}\nEmail: ${email}\n\nPoruka:\n${message}`,
-    attachments: files
-  })
-
-  return { ok: true }
+  return { ok: true, messageId: info.messageId }
 })
+
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
+}

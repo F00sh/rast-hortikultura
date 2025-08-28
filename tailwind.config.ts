@@ -1,13 +1,18 @@
+// tailwind.config.ts
 import type { Config } from 'tailwindcss'
 
-export default <Partial<Config>>{
+const config: Config = {
   darkMode: 'class',
   content: [
     './components/**/*.{vue,js,ts}',
     './layouts/**/*.vue',
     './pages/**/*.vue',
     './app.vue',
-    './error.vue'
+    './error.vue',
+    './plugins/**/*.{js,ts}',
+    './composables/**/*.{js,ts}',
+    // ako koristiš @nuxt/content:
+    './content/**/*.{md,yml,json}'
   ],
   theme: {
     extend: {
@@ -19,5 +24,12 @@ export default <Partial<Config>>{
         subtle: '0 1px 2px 0 rgb(0 0 0 / 0.05)'
       }
     }
-  }
+  },
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/line-clamp')
+    // opcionalno: require('@tailwindcss/forms')
+  ]
 }
+
+export default config

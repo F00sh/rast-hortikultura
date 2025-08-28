@@ -1,5 +1,5 @@
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'vue-bundle-renderer/runtime';
-import { j as joinRelativeURL, u as useRuntimeConfig, g as getResponseStatusText, f as getResponseStatus, h as defineRenderHandler, i as getQuery, k as createError, d as destr, l as getRouteRules, b as useNitroApp } from '../_/nitro.mjs';
+import { j as joinRelativeURL, u as useRuntimeConfig, g as getResponseStatusText, h as getResponseStatus, i as defineRenderHandler, k as getQuery, e as createError, d as destr, l as getRouteRules, b as useNitroApp } from '../_/nitro.mjs';
 import { renderToString } from 'vue/server-renderer';
 import { createHead as createHead$1, propsToString, renderSSRHead } from 'unhead/server';
 import { stringify, uneval } from 'devalue';
@@ -71,7 +71,7 @@ function createHead(options = {}) {
   return head;
 }
 
-const appHead = {"meta":[{"charset":"utf-8"},{"name":"description","content":"Projektiranje vrtova, travnati tepisi, navodnjavanje i održavanje – diljem Hrvatske."},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"name":"color-scheme","content":"light dark"}],"link":[],"style":[],"script":[],"noscript":[],"title":"RAST – Uređenje vrtova i okućnica","htmlAttrs":{"lang":"hr"}};
+const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[]};
 
 const appRootTag = "div";
 

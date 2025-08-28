@@ -1,90 +1,97 @@
 <template>
   <div class="min-h-dvh flex flex-col">
     <!-- HEADER -->
-<header
-  :class="[
-    'sticky top-0 z-50 border-b transition-transform duration-300 will-change-transform',
-    'bg-white/80 backdrop-blur dark:bg-neutral-900/70 dark:border-neutral-800',
-    (hidden && !open) ? '-translate-y-full' : 'translate-y-0'
-  ]"
->
-  <nav class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-4">
-    <!-- LOGO: scroll to top -->
-    <NuxtLink
-      to="/"
-      class="flex items-center gap-2 font-black tracking-wide"
-      @click.prevent="goTop"
-      aria-label="RAST – Početak stranice"
+    <header
+      :class="[
+        'sticky top-0 z-50 transition-transform duration-300 will-change-transform border-b',
+        'bg-white/70 backdrop-blur dark:bg-neutral-900/60 dark:border-neutral-800',
+        (hidden && !open) ? '-translate-y-full' : 'translate-y-0'
+      ]"
     >
-      <span class="inline-block w-3 h-3 rounded-full bg-brand"></span>
-      <span>RAST</span>
-    </NuxtLink>
+      <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+        <!-- LOGO: scroll to top -->
+        <NuxtLink
+          to="/"
+          class="flex items-center gap-2 font-black tracking-wide text-neutral-900 dark:text-neutral-100"
+          @click.prevent="goTop"
+          aria-label="RAST – Početak stranice"
+        >
+          <span class="inline-block w-3.5 h-3.5 rounded-full bg-emerald-600"></span>
+          <span class="text-base">RAST</span>
+        </NuxtLink>
 
-    <!-- DESKTOP NAV -->
-    <ul class="hidden md:flex gap-6 text-sm">
-      <li><a href="/#onama"    class="hover:text-brand">O nama</a></li>
-      <li><a href="/#usluge"   class="hover:text-brand">Usluge</a></li>
-      <li><NuxtLink to="/blog" class="hover:text-brand">Blog</NuxtLink></li>
-      <li><a href="/#galerija" class="hover:text-brand">Galerija</a></li>
-      <li><a href="/#kontakt"  class="hover:text-brand">Kontakt</a></li>
-    </ul>
+        <!-- DESKTOP NAV -->
+        <ul class="hidden md:flex items-center gap-6 text-sm uppercase">
+          <li><a href="/#onama"    class="nav-link">O nama</a></li>
+          <li><a href="/#usluge"   class="nav-link">Usluge</a></li>
+          <li><a href="/#galerija" class="nav-link">Galerija</a></li>
+          <li><a href="/#kontakt"  class="nav-link">Kontakt</a></li>
+        </ul>
 
-    <!-- DESNO: DARK TOGGLE + HAMBURGER -->
-    <div class="flex items-center gap-2">
-      <!-- desktop toggle -->
-      <button
-        class="hidden md:inline-flex text-sm px-3 py-1.5 rounded-md border dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800"
-        @click="toggleTheme"
-        aria-label="Promijeni temu"
+        <!-- DESNO: DARK TOGGLE + HAMBURGER -->
+        <div class="flex items-center gap-2">
+          <!-- desktop toggle -->
+          <button
+            class="hidden md:inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-md border border-neutral-300 dark:border-neutral-700 text-neutral-800 dark:text-neutral-100 hover:bg-neutral-50 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+            @click="toggleTheme"
+            aria-label="Promijeni temu"
+          >
+            <span aria-hidden="true">{{ isDark ? '🌙' : '☀️' }}</span>
+            <span class="hidden lg:inline">{{ isDark ? 'Dark' : 'Light' }}</span>
+          </button>
+
+          <!-- mobile hamburger -->
+          <button
+            class="md:hidden rounded-md px-3 py-1.5 text-sm border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-50 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+            @click="toggleMenu"
+            :aria-expanded="open ? 'true' : 'false'"
+            aria-controls="mobile-menu"
+            aria-label="Menu"
+          >
+            <span v-if="!open">☰</span>
+            <span v-else>✕</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- MOBILE MENU -->
+      <div
+        id="mobile-menu"
+        v-show="open"
+        class="md:hidden absolute inset-x-0 top-full z-40 border-b bg-white/90 backdrop-blur dark:bg-neutral-900/90 dark:border-neutral-800"
       >
-        {{ isDark ? '🌙 Dark' : '☀️ Light' }}
-      </button>
+        <ul class="px-4 py-3 space-y-2 uppercase text-sm text-neutral-900 dark:text-neutral-100">
+          <li><a href="/#onama"    class="mobile-item" @click="onNav">O nama</a></li>
+          <li><a href="/#usluge"   class="mobile-item" @click="onNav">Usluge</a></li>
+          <li><a href="/#galerija" class="mobile-item" @click="onNav">Galerija</a></li>
+          <li><a href="/#kontakt"  class="mobile-item" @click="onNav">Kontakt</a></li>
 
-      <!-- mobile hamburger -->
-      <button
-        class="md:hidden rounded-md border dark:border-neutral-700 px-3 py-1.5 text-sm"
-        @click="toggleMenu"
-        :aria-expanded="open ? 'true' : 'false'"
-        aria-controls="mobile-menu"
-        aria-label="Menu"
-      >
-        {{ open ? '✕' : '☰' }}
-      </button>
-    </div>
-  </nav>
-
-  <!-- MOBILE MENU -->
-  <div
-    id="mobile-menu"
-    v-show="open"
-    class="md:hidden absolute inset-x-0 top-full z-40 border-b bg-white dark:bg-neutral-900 dark:border-neutral-800"
-  >
-    <ul class="px-4 py-2 space-y-2">
-      <li><a href="/#onama"    class="block py-2" @click="onNav">O nama</a></li>
-      <li><a href="/#usluge"   class="block py-2" @click="onNav">Usluge</a></li>
-      <li><NuxtLink to="/blog" class="block py-2" @click="onNav">Blog</NuxtLink></li>
-      <li><a href="/#galerija" class="block py-2" @click="onNav">Galerija</a></li>
-      <li><a href="/#kontakt"  class="block py-2" @click="onNav">Kontakt</a></li>
-      <!-- ⬇️ toggle na dnu menija -->
-      <li class="pt-2 border-t dark:border-neutral-800">
-        <button class="w-full text-left text-sm py-2" @click="toggleTheme">
-          {{ isDark ? '🌙 Dark' : '☀️ Light' }}
-        </button>
-      </li>
-    </ul>
-  </div>
-</header>
+          <!-- toggle na dnu menija -->
+          <li class="pt-1">
+            <button
+              class="w-full mobile-item !justify-between"
+              @click="toggleTheme"
+              aria-label="Promijeni temu"
+            >
+              <span>Tema</span>
+              <span aria-hidden="true">{{ isDark ? '🌙' : '☀️' }}</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </header>
 
     <main class="flex-1">
       <slot />
     </main>
 
-    <footer class="border-t dark:border-neutral-800">
-      <div class="mx-auto max-w-6xl px-4 py-8 text-sm text-neutral-600 dark:text-neutral-300 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+    <!-- FOOTER -->
+    <footer class="border-t bg-white/60 backdrop-blur dark:bg-neutral-900/60 dark:border-neutral-800">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 text-sm text-neutral-700 dark:text-neutral-300 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <span>© {{ new Date().getFullYear() }} RAST – Uređenje vrtova</span>
-        <div class="flex gap-4">
-          <a class="hover:text-brand" href="mailto:fooshmoola@gmail.com">fooshmoola@gmail.com</a>
-          <a class="hover:text-brand" href="tel:+385955448400">+385 95 544 8400</a>
+        <div class="flex flex-wrap items-center gap-4">
+          <a class="hover:text-emerald-700 dark:hover:text-emerald-400 underline underline-offset-4" href="mailto:upiti@rast-hortikultura.hr">upiti@rast-hortikultura.hr</a>
+          <a class="hover:text-emerald-700 dark:hover:text-emerald-400 underline underline-offset-4" href="tel:+385959988777">+385 95 998 8777</a>
         </div>
       </div>
     </footer>
@@ -153,3 +160,20 @@ onMounted(() => {
   })
 })
 </script>
+
+<style scoped>
+.nav-link {
+  @apply text-neutral-900/90 dark:text-neutral-100/90 hover:text-emerald-700 dark:hover:text-emerald-400 transition relative;
+}
+.nav-link::after {
+  content: "";
+  @apply absolute left-0 -bottom-1 h-0.5 w-0 bg-emerald-600 dark:bg-emerald-400 transition-all duration-200;
+}
+.nav-link:hover::after {
+  @apply w-full;
+}
+
+.mobile-item {
+  @apply w-full flex items-center justify-center py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/70 dark:bg-neutral-900/70 hover:bg-neutral-50 dark:hover:bg-neutral-800/80;
+}
+</style>

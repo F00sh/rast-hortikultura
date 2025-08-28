@@ -9,12 +9,15 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "nuxt": "latest",
     "@nuxtjs/tailwindcss": "latest",
+    "gsap": "^3.12.5",
     "nodemailer": "^6.9.14",
-    "gsap": "^3.12.5"
+    "nuxt": "latest"
   },
   "devDependencies": {
+    "@tailwindcss/line-clamp": "^0.4.4",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/nodemailer": "^7.0.1",
     "typescript": "^5.5.4",
     "vue-tsc": "^2.0.28"
   }

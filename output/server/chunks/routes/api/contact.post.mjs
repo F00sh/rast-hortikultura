@@ -1,4 +1,4 @@
-import { c as defineEventHandler, r as readMultipartFormData } from '../../_/nitro.mjs';
+import { c as defineEventHandler, r as readFormData, e as createError, u as useRuntimeConfig } from '../../_/nitro.mjs';
 import nodemailer from 'nodemailer';
 import 'node:http';
 import 'node:https';
@@ -9,35 +9,54 @@ import 'node:path';
 import 'node:crypto';
 import 'node:url';
 
+const CONTACT_TO = "upiti@rast-hortikultura.hr";
 const contact_post = defineEventHandler(async (event) => {
-  var _a, _b, _c, _d, _e, _f;
-  const form = await readMultipartFormData(event);
-  const name = ((_b = (_a = form == null ? void 0 : form.find((f) => f.name === "name")) == null ? void 0 : _a.data) == null ? void 0 : _b.toString("utf-8")) || "";
-  const email = ((_d = (_c = form == null ? void 0 : form.find((f) => f.name === "email")) == null ? void 0 : _c.data) == null ? void 0 : _d.toString("utf-8")) || "";
-  const message = ((_f = (_e = form == null ? void 0 : form.find((f) => f.name === "message")) == null ? void 0 : _e.data) == null ? void 0 : _f.toString("utf-8")) || "";
-  const files = (form || []).filter((f) => f.name === "files" && f.filename).map((f) => ({
-    filename: f.filename,
-    content: f.data,
-    contentType: f.type
-  }));
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: false,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-  });
-  await transporter.sendMail({
-    from: `RAST Web <${process.env.SMTP_USER}>`,
-    to: process.env.MAIL_TO || "fooshmoola@gmail.com",
-    subject: `Kontakt poruka \u2013 ${name || "Bez imena"}`,
-    text: `Ime: ${name}
+  var _a, _b, _c, _d;
+  try {
+    const form = await readFormData(event);
+    const name = String((_a = form.get("name")) != null ? _a : "").trim();
+    const email = String((_b = form.get("email")) != null ? _b : "").trim();
+    const message = String((_c = form.get("message")) != null ? _c : "").trim();
+    const files = Array.from((_d = form.getAll("files")) != null ? _d : []);
+    if (!name || !email || !message) {
+      throw createError({ statusCode: 400, statusMessage: "Nedostaju obavezna polja." });
+    }
+    const attachments = await Promise.all(
+      files.map(async (f, i) => ({
+        filename: f.name || `prilog-${i + 1}`,
+        content: Buffer.from(await f.arrayBuffer()),
+        contentType: f.type || "application/octet-stream"
+      }))
+    );
+    const config = useRuntimeConfig();
+    const port = Number(config.smtpPort || 587);
+    const transporter = nodemailer.createTransport({
+      host: config.smtpHost,
+      port,
+      secure: port === 465,
+      auth: config.smtpUser && config.smtpPass ? { user: config.smtpUser, pass: config.smtpPass } : void 0
+    });
+    await transporter.sendMail({
+      from: `"RAST Web" <${config.smtpUser || "no-reply@rast-hortikultura.hr"}>`,
+      to: CONTACT_TO,
+      // ⇦ šalje se na upiti@rast-hortikultura.hr
+      replyTo: email,
+      // odgovor ide korisniku
+      subject: `Kontakt forma \u2013 ${name}`,
+      text: `Ime: ${name}
 Email: ${email}
 
 Poruka:
 ${message}`,
-    attachments: files
-  });
-  return { ok: true };
+      attachments
+    });
+    return { ok: true };
+  } catch (err) {
+    throw createError({
+      statusCode: (err == null ? void 0 : err.statusCode) || 500,
+      statusMessage: (err == null ? void 0 : err.statusMessage) || "Gre\u0161ka pri slanju poruke."
+    });
+  }
 });
 
 export { contact_post as default };

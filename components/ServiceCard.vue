@@ -1,24 +1,36 @@
 <template>
-  <div class="group block rounded-lg overflow-hidden shadow hover:shadow-lg">
-    <a :href="link" target="_blank" rel="noopener noreferrer">
+  <div
+    class="group rounded-2xl overflow-hidden border bg-white/80 dark:bg-neutral-900/80 dark:border-neutral-800 shadow-subtle hover:shadow transition reveal"
+  >
+    <!-- Slika -->
+    <div class="relative aspect-[4/3] overflow-hidden">
       <img
-        :src="image"
+        :src="image || fallback"
         :alt="title"
-        class="w-full h-60 object-cover transform transition duration-500 group-hover:scale-105"
+        class="w-full h-full object-cover transition-transform duration-500 md:group-hover:scale-105"
+        loading="lazy"
       />
-    </a>
-    <div class="p-4 bg-green-400 dark:bg-orange-700 h-full">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ title }}</h3>
-      <p class="text-gray-600 dark:text-gray-200 text-sm">{{ description }}</p>
+    </div>
+
+    <!-- Sadržaj -->
+    <div class="p-4 md:p-5">
+      <h3 class="text-base md:text-lg font-semibold text-brand dark:text-brand-light">
+        {{ title }}
+      </h3>
+      <p class="mt-2 text-sm text-neutral-700 dark:text-neutral-300">
+        {{ description }}
+      </p>
     </div>
   </div>
 </template>
 
 <script setup>
-defineProps({
-  title: String,
-  description: String,
-  image: String,
-  
+const props = defineProps({
+  title: { type: String, required: true },
+  description: { type: String, default: '' },
+  image: { type: String, default: '' }
 })
+
+const fallback =
+  'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=1200&auto=format&fit=crop'
 </script>

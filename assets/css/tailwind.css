@@ -8,9 +8,15 @@ html {
 }
 
 :root {
+  --brand-light: #74ca77;
   --brand: #2f7d4d;
-  --brand-dark: #1e5a37;
-  --accent: #f08a24;
+  --brand-dark: #2d6946;
+  --accent-light: #e49758;
+  --accent: #da671b;
+  --accent-dark: #a83816;
+  --neutral-light: #c9d6dd;
+  --neutral: #9babb4;
+  --neutral-dark: #505f68;
 
 }
 
@@ -19,7 +25,7 @@ html {
 
 @layer base {
   body {
-    @apply bg-white text-neutral-800;
+    @apply bg-neutral-300 text-neutral-800;
   }
 
   .dark body {

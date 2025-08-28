@@ -1,4 +1,4 @@
-import { c as defineEventHandler, e as setResponseStatus } from '../../../_/nitro.mjs';
+import { c as defineEventHandler, f as setResponseStatus } from '../../../_/nitro.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';

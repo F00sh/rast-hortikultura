@@ -6,15 +6,27 @@ export default defineEventHandler(async (event: H3Event) => {
   const form = await readMultipartFormData(event)
   if (!form) throw createError({ statusCode: 400, statusMessage: 'Bad Request' })
 
-  const getText = (key: string) =>
-    form.find(f => f.name === key && typeof f.data === 'string')?.data as string | undefined
+  // Helper to coerce any field data to string across adapters (Node/Edge)
+  const dataToString = (data: unknown): string => {
+    if (typeof data === 'string') return data
+    // h3 can yield Buffer or Uint8Array depending on adapter
+    if (data instanceof Uint8Array) return Buffer.from(data).toString('utf8')
+    if (Buffer.isBuffer(data)) return (data as Buffer).toString('utf8')
+    return ''
+  }
+
+  const getText = (key: string) => {
+    const f = form.find(f => f.name === key)
+    return f ? dataToString(f.data) : undefined
+  }
 
   const name = (getText('name') || '').trim()
   const email = (getText('email') || '').trim()
   const message = (getText('message') || '').trim()
 
+  // Normalize files: accept Buffer or Uint8Array
   const files = form.filter(
-    f => f.name === 'files' && f.filename && f.type && Buffer.isBuffer(f.data)
+    f => f.name === 'files' && f.filename && f.type && (Buffer.isBuffer(f.data) || ((f.data as any) instanceof Uint8Array))
   )
 
   if (!name || !email || !message) {
@@ -47,7 +59,7 @@ export default defineEventHandler(async (event: H3Event) => {
 
   const attachments = files.map(f => ({
     filename: f.filename!,
-    content: f.data as Buffer,
+    content: Buffer.isBuffer(f.data) ? (f.data as Buffer) : Buffer.from(f.data as Uint8Array),
     contentType: f.type
   }))
 

@@ -12,15 +12,21 @@ import 'node:url';
 const contact_post = defineEventHandler(async (event) => {
   const form = await readMultipartFormData(event);
   if (!form) throw createError({ statusCode: 400, statusMessage: "Bad Request" });
+  const dataToString = (data) => {
+    if (typeof data === "string") return data;
+    if (data instanceof Uint8Array) return Buffer.from(data).toString("utf8");
+    if (Buffer.isBuffer(data)) return data.toString("utf8");
+    return "";
+  };
   const getText = (key) => {
-    var _a;
-    return (_a = form.find((f) => f.name === key && typeof f.data === "string")) == null ? void 0 : _a.data;
+    const f = form.find((f2) => f2.name === key);
+    return f ? dataToString(f.data) : void 0;
   };
   const name = (getText("name") || "").trim();
   const email = (getText("email") || "").trim();
   const message = (getText("message") || "").trim();
   const files = form.filter(
-    (f) => f.name === "files" && f.filename && f.type && Buffer.isBuffer(f.data)
+    (f) => f.name === "files" && f.filename && f.type && (Buffer.isBuffer(f.data) || f.data instanceof Uint8Array)
   );
   if (!name || !email || !message) {
     throw createError({ statusCode: 400, statusMessage: "Nedostaju polja." });
@@ -47,7 +53,7 @@ const contact_post = defineEventHandler(async (event) => {
   await transporter.verify();
   const attachments = files.map((f) => ({
     filename: f.filename,
-    content: f.data,
+    content: Buffer.isBuffer(f.data) ? f.data : Buffer.from(f.data),
     contentType: f.type
   }));
   const subject = `Novi upit s weba \u2013 ${name}`;
